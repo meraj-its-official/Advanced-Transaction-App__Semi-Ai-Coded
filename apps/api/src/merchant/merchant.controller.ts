@@ -32,7 +32,7 @@ export class MerchantController {
         );
     }
 
-    @Post('settle')
+    @Post('settlement')
     settle(@Req() req: any) {
         return this.merchantService.settleToPersonalWallet(req.user.id);
     }
