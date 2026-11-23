@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                 String                @id
+  name               String
+  email              String                @unique
+  emailVerified      Boolean               @default(false)
+  image              String?
+  phoneNumber        String?               @unique
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  accounts           Account[]
+  balance            Balance?
+  bankAccounts       BankAccount[]
+  merchant           Merchant?
+  merchantPayments   MerchantTransaction[]
+  onRampTransactions OnRampTransaction[]
+  sentTransfers      P2PTransfer[]         @relation("FromUserRelation")
+  receivedTransfers  P2PTransfer[]         @relation("ToUserRelation")
+  sessions           Session[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+}
+
+model Balance {
+  id     String  @id @default(cuid())
+  userId String  @unique
+  amount Decimal @default(0.0) @db.Decimal(18, 2)
+  locked Decimal @default(0.0)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("balance")
+}
+
+model BankAccount {
+  id                 String              @id @default(cuid())
+  userId             String
+  accountNumber      String
+  ifscCode           String
+  bankName           String
+  holderName         String
+  isVerified         Boolean             @default(false)
+  isPrimary          Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  onRampTransactions OnRampTransaction[]
+
+  @@unique([userId, accountNumber])
+  @@map("bank_account")
+}
+
+model OnRampTransaction {
+  id            String       @id @default(cuid())
+  status        OnRampStatus @default(Processing)
+  token         String       @unique
+  provider      String
+  amount        Decimal      @db.Decimal(18, 2)
+  startTime     DateTime     @default(now())
+  userId        String
+  bankAccountId String?
+  currency      String       @default("INR")
+  bankAccount   BankAccount? @relation(fields: [bankAccountId], references: [id])
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("on_ramp_transaction")
+}
+
+model P2PTransfer {
+  id         String   @id @default(cuid())
+  amount     Decimal  @db.Decimal(18, 2)
+  timestamp  DateTime @default(now())
+  fromUserId String
+  toUserId   String
+  fromUser   User     @relation("FromUserRelation", fields: [fromUserId], references: [id])
+  toUser     User     @relation("ToUserRelation", fields: [toUserId], references: [id])
+
+  @@map("p2p_transfer")
+}
+
+model Merchant {
+  id           String                @id @default(cuid())
+  userId       String                @unique
+  businessName String
+  merchantCode String                @unique
+  category     String
+  balance      Int                   @default(0)
+  createdAt    DateTime              @default(now())
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions MerchantTransaction[]
+
+  @@map("merchant")
+}
+
+model MerchantTransaction {
+  id         String   @id @default(cuid())
+  amount     Decimal  @db.Decimal(18, 2)
+  note       String?
+  timestamp  DateTime @default(now())
+  fromUserId String
+  merchantId String
+  currency   String   @default("INR")
+  fromUser   User     @relation(fields: [fromUserId], references: [id])
+  merchant   Merchant @relation(fields: [merchantId], references: [id])
+
+  @@map("merchant_transaction")
+}
+
+enum OnRampStatus {
+  Success
+  Failure
+  Processing
+}

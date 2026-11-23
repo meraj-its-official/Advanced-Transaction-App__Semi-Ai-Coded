@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: paytm_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: meraj_alam
+      POSTGRES_PASSWORD: paytm_secret_654123
+      POSTGRES_DB: neondb
+    ports:
+      - "5433:5432"   # Host port 5433 -> Container port 5432
+    volumes:
+      - paytm_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U meraj_alam -d neondb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: paytm_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6380:6379"   # Host port 6380 -> Container port 6379
+    volumes:
+      - paytm_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  paytm_postgres_data:
+  paytm_redis_data:
