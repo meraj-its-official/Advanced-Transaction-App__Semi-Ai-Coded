@@ -66,7 +66,7 @@ export class BankingController {
 
   @ApiOperation({ summary: 'Mock bank checkout page' })
   @ApiQuery({ name: 'token', required: true, type: String })
-  @Get('mock-checkout')
+  @Get('checkout')
   async mockCheckout(@Query('token') token: string, @Res() res: Response) {
     const txn = await this.bankingService.getTxnByToken(token);
     if (!txn) return res.status(404).send('Invalid Payment Token');
@@ -91,7 +91,7 @@ export class BankingController {
   }
 
   @ApiOperation({ summary: 'Mock bank payment confirmation' })
-  @Post('mock-confirm')
+  @Post('confirm')
   async mockConfirm(@Body() dto: BankWebhookDto, @Res() res: Response) {
     await this.bankingService.processBankWebhook(dto.token, dto.status);
     return res.redirect('http://localhost:3000/dashboard');
