@@ -64,10 +64,10 @@ export class BankingController {
     return this.bankingService.processBankWebhook(dto.token, dto.status);
   }
 
-  @ApiOperation({ summary: 'Mock bank checkout page' })
+  @ApiOperation({ summary: 'Bank checkout page' })
   @ApiQuery({ name: 'token', required: true, type: String })
   @Get('checkout')
-  async mockCheckout(@Query('token') token: string, @Res() res: Response) {
+  async checkOut(@Query('token') token: string, @Res() res: Response) {
     const txn = await this.bankingService.getTxnByToken(token);
     if (!txn) return res.status(404).send('Invalid Payment Token');
 
@@ -90,9 +90,9 @@ export class BankingController {
     `);
   }
 
-  @ApiOperation({ summary: 'Mock bank payment confirmation' })
+  @ApiOperation({ summary: 'Bank payment confirmation' })
   @Post('confirm')
-  async mockConfirm(@Body() dto: BankWebhookDto, @Res() res: Response) {
+  async confirm(@Body() dto: BankWebhookDto, @Res() res: Response) {
     await this.bankingService.processBankWebhook(dto.token, dto.status);
     return res.redirect('http://localhost:3000/dashboard');
   }

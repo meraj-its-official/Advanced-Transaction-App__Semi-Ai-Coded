@@ -26,7 +26,7 @@ export class CreateBankAccountDto {
     @IsNotEmpty()
     bankName: string;
 
-    @ApiProperty({ example: 'MD Meraj Alam', description: 'Account holder name (Required by schema)' })
+    @ApiProperty({ example: 'Md Meraj Alam', description: 'Account holder name (Required by schema)' })
     @IsString()
     @IsNotEmpty()
     holderName: string;
