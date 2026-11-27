@@ -37,7 +37,7 @@ export const walletApi = {
     // Updated to new /banking/onramp endpoint (purane naam se compatibility ke liye dono rakhe hain)
     initiateOnRamp: (amountInRupees: number, provider: string) =>
         apiFetch<{ transactionId: string; token: string; checkoutUrl: string }>(
-            "/banking/onramp",
+            "/banking/transaction",
             {
                 method: "POST",
                 body: JSON.stringify({

@@ -47,7 +47,7 @@ export class BankingController {
   @UseGuards(BetterAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Initiate On-Ramp transaction' })
-  @Post('onramp')
+  @Post('transaction')
   initiateOnRamp(@Req() req: any, @Body() dto: CreateOnRampDto) {
     return this.bankingService.initiateOnRamp(
       req.user.id,

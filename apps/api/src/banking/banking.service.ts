@@ -86,7 +86,7 @@ export class BankingService {
         return {
             transactionId: txn.id,
             token: txn.token,
-            checkoutUrl: `http://localhost:3001/banking/mock-checkout?token=${txn.token}`,
+            checkoutUrl: `http://localhost:3001/banking/checkout?token=${txn.token}`,
         };
     }
 
